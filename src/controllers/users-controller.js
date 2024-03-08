@@ -1,6 +1,7 @@
 const knex = require("../database/knex")
+const AppError = require("../utils/app-error")
 
-class UsersControllers {
+class UsersController {
 
   async create(request, response) {
     const { name, email, password } = request.body
@@ -8,7 +9,7 @@ class UsersControllers {
     const userAlreadyExists = await knex("users").where({ email }).first()
 
     if (userAlreadyExists) {
-      throw new Error("User already exists")
+      throw new AppError("User already exists")
     }
 
     await knex("users").insert({
@@ -21,4 +22,4 @@ class UsersControllers {
   }
 }
 
-module.exports = UsersControllers
+module.exports = UsersController
