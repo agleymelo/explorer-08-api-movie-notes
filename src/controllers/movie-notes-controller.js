@@ -18,6 +18,25 @@ class MovieNotesController {
     return response.status(200).json(movieNotes)
   }
 
+  async show(request, response) {
+    const { user_id } = request.query
+    const { id } = request.params
+
+    const user = await knex("users").where({ id: user_id }).first()
+
+    if (!user) {
+      throw new AppError("User not found")
+    }
+
+    const movieNote = await knex("movie-notes").where({ id }).first()
+
+    if (!movieNote) {
+      throw new AppError("Movie Note not found")
+    }
+
+    return response.status(200).json(movieNote)
+  }
+
   async create(request, response) {
     const { user_id } = request.params
     const { title, description, rating } = request.body
@@ -41,6 +60,7 @@ class MovieNotesController {
 
     return response.status(201).json()
   }
+
 }
 
 module.exports = MovieNotesController
