@@ -61,7 +61,7 @@ class UsersController {
       name: user.name,
       email: user.email,
       password: user.password,
-      updated_at: knex.fn.now()
+      updated_at: knex.fn.now(),
     })
 
     return response.status(200).json()
