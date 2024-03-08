@@ -5,7 +5,7 @@ const knex = require("../database/knex")
 class MovieNotesController {
 
   async index(request, response) {
-    const { user_id } = request.query
+    const { user_id, title, tags } = request.query
 
     const user = await knex("users").where({ id: user_id }).first()
 
@@ -13,9 +13,38 @@ class MovieNotesController {
       throw new AppError("User not found")
     }
 
-    const movieNotes = await knex("movie-notes").where({ user_id })
+    let notes
 
-    return response.status(200).json(movieNotes)
+    if (tags) {
+      const filtredTags = tags.split(",").map(tag => tag.trim())
+
+      notes = await knex("movie-tags")
+        .select([
+          "movie-notes.id",
+          "movie-notes.title",
+          "movie-notes.user_id"
+        ])
+        .where("movie-notes.user_id", user_id)
+        .whereLike("movie-notes.title", `%${title}%`)
+        .whereIn("name", filtredTags)
+        .innerJoin("movie-notes", "movie-notes.id", "movie-tags.note_id")
+        .orderBy("movie-tags.title")
+    } else {
+      notes = await knex("movie-notes").where({ user_id }).orderBy("title")
+    }
+
+    const movieTags = await knex("movie-tags").where({ user_id })
+
+    const notedWithTags = movieTags.map(node => {
+      const noteTag = movieTags.filter(tag => tag.note_id === node.id)
+
+      return {
+        ...notes,
+        tag: noteTag
+      }
+    })
+
+    return response.status(200).json(notedWithTags)
   }
 
   async show(request, response) {
@@ -34,12 +63,17 @@ class MovieNotesController {
       throw new AppError("Movie Note not found")
     }
 
-    return response.status(200).json(movieNote)
+    const tags = await knex("movie-tags").where({ note_id: id }).orderBy("name")
+
+    return response.status(200).json({
+      ...movieNote,
+      tags
+    })
   }
 
   async create(request, response) {
     const { user_id } = request.params
-    const { title, description, rating } = request.body
+    const { title, description, rating, tags } = request.body
 
     const user = await knex("users").where({ id: user_id }).first()
 
@@ -51,12 +85,22 @@ class MovieNotesController {
       throw new AppError("the rating must be between 1 and 5")
     }
 
-    await knex("movie-notes").insert({
+    const [note_id] = await knex("movie-notes").insert({
       title,
       description,
       rating,
       user_id,
     })
+
+    const tagsInsert = tags.map(name => {
+      return {
+        name,
+        note_id,
+        user_id
+      }
+    })
+
+    await knex("movie-tags").insert(tagsInsert)
 
     return response.status(201).json()
   }
