@@ -1,3 +1,5 @@
+const knex = require("../database/knex")
+const AppError = require('../utils/app-error')
 class SessionsController {
 
   async create(request, response) {
