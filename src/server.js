@@ -1,11 +1,14 @@
 require("express-async-errors")
 
 const express = require("express")
+const cors = require("cors")
 
 const AppError = require("./utils/app-error")
 const routes = require("./routes")
 
 const app = express()
+
+app.use(cors())
 
 app.use(express.json())
 app.use(routes)
