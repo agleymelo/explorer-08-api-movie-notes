@@ -7,6 +7,6 @@ const sessionsController = new SessionsController()
 
 const sessionRoutes = Router()
 
-sessionRoutes.post("/", ensureAuthenticated, sessionsController.create)
+sessionRoutes.post("/", sessionsController.create)
 
 module.exports = sessionRoutes
