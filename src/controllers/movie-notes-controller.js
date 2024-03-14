@@ -5,7 +5,8 @@ const knex = require("../database/knex")
 class MovieNotesController {
 
   async index(request, response) {
-    const { user_id, title, tags } = request.query
+    const { title, tags } = request.query
+    const user_id = request.user.id
 
     const user = await knex("users").where({ id: user_id }).first()
 
@@ -40,7 +41,7 @@ class MovieNotesController {
 
       return {
         ...notes,
-        tag: noteTag
+        tags: noteTag
       }
     })
 
@@ -48,7 +49,7 @@ class MovieNotesController {
   }
 
   async show(request, response) {
-    const { user_id } = request.query
+    const user_id = request.user.id
     const { id } = request.params
 
     const user = await knex("users").where({ id: user_id }).first()
@@ -72,7 +73,7 @@ class MovieNotesController {
   }
 
   async create(request, response) {
-    const { user_id } = request.params
+    const user_id = request.user.id
     const { title, description, rating, tags } = request.body
 
     const user = await knex("users").where({ id: user_id }).first()
@@ -106,7 +107,7 @@ class MovieNotesController {
   }
 
   async delete(request, response) {
-    const { user_id } = request.query
+    const user_id = request.user.id
     const { id } = request.params
 
     const user = await knex("users").where({ id: user_id }).first()

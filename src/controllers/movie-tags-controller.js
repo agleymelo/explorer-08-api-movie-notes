@@ -1,11 +1,12 @@
-
-const AppError = require("../utils/app-error")
-const knex = require("../database/knex")
+const knex = require('../database/knex')
 
 class MovieTagsController {
+  async index(request, response) {
+    const user_id = request.user.id
 
-  async create(request, response) {
-    const { user_id } = request.params
+    const tags = await knex('tags').where({ user_id }).groupBy('name')
+
+    return response.status(200).json(tags)
   }
 }
 
